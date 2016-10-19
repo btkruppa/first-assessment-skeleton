@@ -1,6 +1,5 @@
 package com.cooksys.assessment.server;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,21 +31,17 @@ public class ClientWritter implements Runnable {
 	public void run() {
 		try {
 			log.info("Client Writer thread started for " + username);
-			Message sendingMessage = new Message();
+			Message sendingMessage;
 			String response = "";
-			List<String> entry = new ArrayList<String>();
 			do {
 				// if this sleep is not here then we can potentially flush two
 				// messages into 1 on the JavaScript client side
 				Thread.sleep(10);
-				entry = userMessagesCollection.removeFromUsersQueue(username);
-				sendingMessage.setUsername(entry.get(0));
-				sendingMessage.setCommand(entry.get(1));
-				sendingMessage.setContents(entry.get(2));
+				sendingMessage = userMessagesCollection.removeFromUsersQueue(username);
 				response = mapper.writeValueAsString(sendingMessage);
 				writer.write(response);
 				writer.flush();
-			} while(entry.get(1) != "TERMINATE");
+			} while(sendingMessage.getCommand() != "TERMINATE");
 		} catch (JsonProcessingException e) {
 			log.error("error on queue", e);
 		} catch (InterruptedException e) {

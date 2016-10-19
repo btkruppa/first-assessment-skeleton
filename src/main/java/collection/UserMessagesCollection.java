@@ -8,24 +8,22 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.cooksys.assessment.model.Message;
+
 public class UserMessagesCollection {
-	private Map<String, BlockingQueue<List<String>>> messagesCollection = new ConcurrentHashMap();
+	private Map<String, BlockingQueue<Message>> messagesCollection = new ConcurrentHashMap();
 
 	public void addUserToCollection(String username) { 
-		messagesCollection.put(username, new LinkedBlockingQueue<List<String>>());
+		messagesCollection.put(username, new LinkedBlockingQueue<Message>());
 	}
 
 	public boolean containsUser(String username) {
 		return messagesCollection.containsKey(username);
 	}
 
-	public void addMessageToUserQueue(String username, String command, String contents) {
-		if (messagesCollection.containsKey(username)) {
-			List<String> entry = new ArrayList<String>();
-			entry.add(username);
-			entry.add(command);
-			entry.add(contents);
-			messagesCollection.get(username).add(entry);
+	public void addMessageToUserQueue(Message message) {
+		if (messagesCollection.containsKey(message.getUsername())) {
+			messagesCollection.get(message.getUsername()).add(message);
 		}
 	}
 
@@ -33,13 +31,13 @@ public class UserMessagesCollection {
 		messagesCollection.remove(username);
 	}
 
-	public List<String> removeFromUsersQueue(String username) {
+	public Message removeFromUsersQueue(String username) {
 		try {
 			return messagesCollection.get(username).take();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new ArrayList<String>();
+			return new Message();
 		}
 	}
 

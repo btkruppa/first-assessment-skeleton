@@ -56,7 +56,7 @@ public class ClientHandler implements Runnable {
 	private synchronized void broadcast(String command, String message) {
 		Set<String> userSet = userMessagesCollection.getUserList();
 		for (String user : userSet) {
-			userMessagesCollection.addMessageToUserQueue(user, command, message);
+			userMessagesCollection.addMessageToUserQueue(new Message(user, command, message));
 		}
 	}
 
@@ -68,7 +68,7 @@ public class ClientHandler implements Runnable {
 	public void disconnectUser() {
 		// if our user disconnects without sending a disconnect message then
 		// we need to send a message to ClientWritter to Terminate
-		userMessagesCollection.addMessageToUserQueue(username, "TERMINATE", "You have been terminated");
+		userMessagesCollection.addMessageToUserQueue(new Message(username, "TERMINATE", "You have been terminated"));
 		userMessagesCollection.removeUserFromCollection(username);
 		broadcast("disconnect", getTimeStamp() + ": <" + username + "> has disconnected");
 		try {
@@ -123,7 +123,7 @@ public class ClientHandler implements Runnable {
 					log.info("user <{}> echoed message <{}>", message.getUsername(), message.getContents());
 					responseContents = getTimeStamp() + " <" + message.getUsername() + "> (echo): <"
 							+ message.getContents() + ">";
-					userMessagesCollection.addMessageToUserQueue(username, message.getCommand(), responseContents);
+					userMessagesCollection.addMessageToUserQueue(new Message(username, message.getCommand(), responseContents));
 					break;
 				case "users":
 					log.info("user <{}> requested users", message.getUsername());
@@ -132,26 +132,29 @@ public class ClientHandler implements Runnable {
 					for (String user : userSet) {
 						responseContents += (user + "\n");
 					}
-					userMessagesCollection.addMessageToUserQueue(username, message.getCommand(), responseContents);
-					break;
-				case "direct message":
-					String[] splitted = message.getContents().split(" ");
-					if (!userMessagesCollection.containsUser(splitted[0])) {
-						userMessagesCollection.addMessageToUserQueue(username, message.getCommand(), "user " + splitted[0] + " does not exist, direct message failed");
-					} else {
-						log.info("user <{}> sent message <{}> to <{}>", message.getUsername(),
-								message.getContents().substring(splitted[0].length()), splitted[0]);
-						userMessagesCollection.addMessageToUserQueue(splitted[0], message.getCommand(),
-								getTimeStamp() + " <" + username + "> (whisper):"
-										+ message.getContents().substring(splitted[0].length()));
-					}
+					userMessagesCollection.addMessageToUserQueue(new Message(username, message.getCommand(), responseContents));
 					break;
 				case "broadcast":
 					log.info("user <{}> sent message <{}> to all users", message.getUsername(), message.getContents());
 					broadcast(message.getCommand(),
 							getTimeStamp() + " <" + username + "> (all):" + message.getContents());
 					break;
+				default:
+					if(message.getCommand().charAt(0) == '@') {
+						String recipient = message.getCommand().substring(1);
+						if (!userMessagesCollection.containsUser(recipient)) {
+							userMessagesCollection.addMessageToUserQueue(new Message(username, message.getCommand(), "user " + recipient + " does not exist, direct message failed"));
+						} else {
+							log.info("user <{}> sent message <{}> to <{}>", message.getUsername(),
+									message.getContents(), recipient);
+							userMessagesCollection.addMessageToUserQueue(new Message(recipient, message.getCommand(),
+									getTimeStamp() + " <" + username + "> (whisper):"
+											+ message.getContents()));
+						}
+					}
+					break;	
 				}
+					
 			}
 
 		} catch (IOException e) {
