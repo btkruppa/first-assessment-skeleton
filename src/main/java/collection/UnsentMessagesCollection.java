@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.cooksys.assessment.model.Message;
 
-public class UserMessagesCollection {
+public class UnsentMessagesCollection {
 	private Map<String, BlockingQueue<Message>> messagesCollection = new ConcurrentHashMap();
 
 	public void addUserToCollection(String username) { 
@@ -21,9 +21,9 @@ public class UserMessagesCollection {
 		return messagesCollection.containsKey(username);
 	}
 
-	public void addMessageToUserQueue(Message message) {
-		if (messagesCollection.containsKey(message.getUsername())) {
-			messagesCollection.get(message.getUsername()).add(message);
+	public void addMessageToUserQueue(String recipient, Message message) {
+		if (messagesCollection.containsKey(recipient)) {
+			messagesCollection.get(recipient).add(message);
 		}
 	}
 

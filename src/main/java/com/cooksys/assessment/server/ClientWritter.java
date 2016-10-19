@@ -11,7 +11,7 @@ import com.cooksys.assessment.model.Message;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import collection.UserMessagesCollection;
+import collection.UnsentMessagesCollection;
 
 public class ClientWritter implements Runnable {
 	private Logger log = LoggerFactory.getLogger(ClientWritter.class);
@@ -19,9 +19,9 @@ public class ClientWritter implements Runnable {
 	private PrintWriter writer;
 	private String username;
 	private ObjectMapper mapper = new ObjectMapper();
-	private UserMessagesCollection userMessagesCollection;
+	private UnsentMessagesCollection userMessagesCollection;
 
-	public ClientWritter(PrintWriter writer, String username, UserMessagesCollection userMessagesCollection) {
+	public ClientWritter(PrintWriter writer, String username, UnsentMessagesCollection userMessagesCollection) {
 		this.writer = writer;
 		this.username = username;
 		this.userMessagesCollection = userMessagesCollection;

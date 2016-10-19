@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import collection.UserMessagesCollection;
+import collection.UnsentMessagesCollection;
 
 public class Server implements Runnable {
 	private Logger log = LoggerFactory.getLogger(Server.class);
@@ -27,7 +27,7 @@ public class Server implements Runnable {
 		ServerSocket ss;
 		try {
 			ss = new ServerSocket(this.port);
-			UserMessagesCollection userMessagesCollection = new UserMessagesCollection();
+			UnsentMessagesCollection userMessagesCollection = new UnsentMessagesCollection();
 			while (true) {
 				Socket socket = ss.accept();
 				ClientHandler handler = new ClientHandler(socket, executor, userMessagesCollection);
