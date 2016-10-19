@@ -8,6 +8,8 @@ export const cli = vorpal()
 
 let username
 let server
+let lastCommand
+let lastDirectMessage
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -45,6 +47,7 @@ cli
           break
         default:
           this.log(contents)
+          break
       }
     })
 
@@ -55,21 +58,44 @@ cli
   .action(function (input, callback) {
     const [ command, ...rest ] = input.split(' ')
     const contents = rest.join(' ')
+    let lastCommandValid = true
 
-    if (command === 'disconnect') {
-      server.end(new Message({ username, command }).toJSON() + '\n')
-    } else if (command === 'echo') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (command === 'users') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (command === 'broadcast') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (command.charAt(0) === '@') {
-      let newContents = command.substring(1) + ' ' + contents
-      server.write(new Message({ username, command: 'direct message', contents: newContents }).toJSON() + '\n')
-    } else {
-      this.log(`Command <${command}> was not recognized`)
+    switch (command) {
+      case ('disconnect'):
+        server.end(new Message({ username, command }).toJSON() + '\n')
+        break
+      case ('echo'):
+        lastCommand = command
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+        break
+      case ('users'):
+        lastCommand = command
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+        break
+      case ('broadcast'):
+        lastCommand = command
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+        break
+      default:
+        if (command.charAt(0) === '@') {
+          let newContents = command.substring(1) + ' ' + contents
+          server.write(new Message({ username, command: 'direct message', contents: newContents }).toJSON() + '\n')
+          lastCommand = command
+        } else if (lastCommand) {
+          if (lastCommand.charAt(0) === '@') {
+            let newContents = lastCommand.substring(1) + ' ' + command + ' ' + contents
+            server.write(new Message({ username, command: 'direct message', contents: newContents }).toJSON() + '\n')
+          } else {
+            server.write(new Message({ username, command: lastCommand, contents: command + ' ' + contents }).toJSON() + '\n')
+          }
+        } else {
+          this.log(`Command <${command}> was not recognized`)
+        }
+        lastCommandValid = false
+        break
     }
-
+    if (lastCommandValid) {
+      lastCommand = command
+    }
     callback()
   })

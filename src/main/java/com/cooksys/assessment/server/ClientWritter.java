@@ -20,10 +20,12 @@ public class ClientWritter implements Runnable {
 	private PrintWriter writer;
 	private String username;
 	private ObjectMapper mapper = new ObjectMapper();
+	private UserMessagesCollection userMessagesCollection;
 
-	public ClientWritter(PrintWriter writer, String username) {
+	public ClientWritter(PrintWriter writer, String username, UserMessagesCollection userMessagesCollection) {
 		this.writer = writer;
 		this.username = username;
+		this.userMessagesCollection = userMessagesCollection;
 	}
 
 	@Override
@@ -33,24 +35,24 @@ public class ClientWritter implements Runnable {
 			Message sendingMessage = new Message();
 			String response = "";
 			List<String> entry = new ArrayList<String>();
-			while (true) {
+			do {
 				// if this sleep is not here then we can potentially flush two
 				// messages into 1 on the JavaScript client side
 				Thread.sleep(10);
-				entry = UserMessagesCollection.removeFromUsersQueue(username);
+				entry = userMessagesCollection.removeFromUsersQueue(username);
 				sendingMessage.setUsername(entry.get(0));
 				sendingMessage.setCommand(entry.get(1));
 				sendingMessage.setContents(entry.get(2));
 				response = mapper.writeValueAsString(sendingMessage);
 				writer.write(response);
 				writer.flush();
-			}
+			} while(entry.get(1) != "TERMINATE");
 		} catch (JsonProcessingException e) {
 			log.error("error on queue", e);
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally {
+			log.info(username + "'s writter thread has come to an end");
 		}
 
 	}
