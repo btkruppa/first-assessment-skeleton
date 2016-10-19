@@ -1,5 +1,6 @@
 import vorpal from 'vorpal'
-import { words } from 'lodash'
+// import { words } from 'lodash'
+import chalk from 'chalk'
 import { connect } from 'net'
 import { Message } from './Message'
 
@@ -22,7 +23,29 @@ cli
     })
 
     server.on('data', (buffer) => {
-      this.log(Message.fromJSON(buffer).toString())
+      let { command, contents } = Message.fromJSON(buffer)
+      switch (command) {
+        case 'connect':
+          this.log(chalk.green(contents))
+          break
+        case 'disconnect':
+          this.log(chalk.red(contents))
+          break
+        case 'echo':
+          this.log(chalk.magenta(contents))
+          break
+        case 'users':
+          this.log(chalk.yellow(contents))
+          break
+        case 'direct message':
+          this.log(chalk.blue(contents))
+          break
+        case 'broadcast':
+          this.log(chalk.white(contents))
+          break
+        default:
+          this.log(contents)
+      }
     })
 
     server.on('end', () => {
@@ -30,7 +53,7 @@ cli
     })
   })
   .action(function (input, callback) {
-    const [ command, ...rest ] = input.split(' ') //words removes @???
+    const [ command, ...rest ] = input.split(' ')
     const contents = rest.join(' ')
 
     if (command === 'disconnect') {
@@ -42,7 +65,7 @@ cli
     } else if (command === 'broadcast') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command.charAt(0) === '@') {
-      let newContents = command.substring(1) + ' ' +contents
+      let newContents = command.substring(1) + ' ' + contents
       server.write(new Message({ username, command: 'direct message', contents: newContents }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)

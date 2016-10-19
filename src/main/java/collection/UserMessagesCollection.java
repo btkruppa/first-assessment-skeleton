@@ -1,29 +1,35 @@
 package collection;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class UserMessagesCollection {
-	private static Map<String, Queue<String>> messagesCollection = new HashMap();
+	private static Map<String, BlockingQueue<List<String>>> messagesCollection = new HashMap();
 
 	public static Set<String> getKeys() {
 		return messagesCollection.keySet();
 	}
 
 	public static void addUserToCollection(String username) {
-		messagesCollection.put(username, new ConcurrentLinkedQueue<String>());
+		messagesCollection.put(username, new LinkedBlockingQueue<List<String>>());
 	}
 
 	public static boolean containsUser(String username) {
 		return messagesCollection.containsKey(username);
 	}
 
-	public static void addMessageToUserQueue(String username, String contents) {
+	public static void addMessageToUserQueue(String username, String command, String contents) {
 		if (messagesCollection.containsKey(username)) {
-			messagesCollection.get(username).add(contents);
+			List<String> entry = new ArrayList<String>();
+			entry.add(username);
+			entry.add(command);
+			entry.add(contents);
+			messagesCollection.get(username).add(entry);
 		}
 	}
 
@@ -31,13 +37,20 @@ public class UserMessagesCollection {
 		messagesCollection.remove(username);
 	}
 
-	public static String removeFromUsersQueue(String username) {
-		return messagesCollection.get(username).remove();
+	public static List<String> removeFromUsersQueue(String username) {
+		try {
+			return messagesCollection.get(username).take();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return new ArrayList<String>();
+		}
 	}
 
 	public static boolean isUserQueueEmpty(String username) {
-		//make sure there is a user in the collecting before trying to check the queue
-		if(messagesCollection.containsKey(username)){
+		// make sure there is a user in the collecting before trying to check
+		// the queue
+		if (messagesCollection.containsKey(username)) {
 			return messagesCollection.get(username).isEmpty();
 		}
 		return true;
