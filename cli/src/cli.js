@@ -30,6 +30,44 @@ function encrypt (someString) {
   return someString
 }
 
+// attempts to process a command with the given contents, if it succeeds it will return true and if not it will return false
+function processCommand (command, contents) {
+  let newContents = ''
+  if (command === 'echo' || command === 'broadcast' || command.charAt(0) === '@') {
+    let commandTag = (command.charAt(0) === '@') ? 'whisper' : (command === 'broadcast') ? 'all' : 'echo'
+    newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (${commandTag}): ${contents}`
+    newContents = encrypt(newContents)
+    server.write(new Message({ username, command, contents: newContents }).toJSON() + '\n')
+    lastCommand = command
+  } else if (command === '/r') {
+    if (replyCommand) {
+      newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (whisper): ${contents}`
+      newContents = encrypt(newContents)
+      server.write(new Message({ username, command: replyCommand, contents: newContents }).toJSON() + '\n')
+      lastCommand = replyCommand
+    } else {
+      this.log('You have not yet received a message from another user.')
+    }
+  } else if (command === 'users') {
+    server.write(new Message({ username, command, contents: newContents }).toJSON() + '\n')
+    lastCommand = command
+  } else if (command === 'encrypt') {
+    encryptVal = 0
+    if (contents !== 'stop') {
+      for (let i = 0; i < contents.length; i++) {
+        encryptVal += contents.charCodeAt(i)
+      }
+    }
+  } else if (command === 'help') {
+    this.log(fs.readFileSync('./src/instructions.txt').toString())
+  } else if (command === 'disconnect') {
+    server.end(new Message({ username, command }).toJSON() + '\n')
+  } else {
+    return false
+  }
+  return true
+}
+
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
 
@@ -94,67 +132,14 @@ cli
   .action(function (input, callback) {
     const [ command, ...rest ] = input.split(' ')
     const contents = rest.join(' ')
-    let newContents = ''
 
-    switch (command) {
-      case ('disconnect'):
-        server.end(new Message({ username, command }).toJSON() + '\n')
-        break
-      case ('echo'):
-        newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (echo): ${contents}`
-        newContents = encrypt(newContents)
-        server.write(new Message({ username, command, contents: newContents }).toJSON() + '\n')
-        lastCommand = command
-        break
-      case ('users'):
-        server.write(new Message({ username, command, contents: newContents }).toJSON() + '\n')
-        lastCommand = command
-        break
-      case ('broadcast'):
-        newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (all): ${contents}`
-        newContents = encrypt(newContents)
-        server.write(new Message({ username, command, contents: newContents }).toJSON() + '\n')
-        lastCommand = command
-        break
-      case ('/r'):
-      // once initiated in a reply cycle, the repeat will continue to send to that user until you type /r again which will update to most recent user or another valid command
-        if (replyCommand) {
-          newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (whisper): ${contents}`
-          newContents = encrypt(newContents)
-          server.write(new Message({ username, command: replyCommand, contents: newContents }).toJSON() + '\n')
-          lastCommand = replyCommand
-        } else {
-          this.log('You have not yet received a message from another user.')
-        }
-        break
-      case ('help'):
-        console.log(fs.readFileSync('./src/instructions.txt').toString())
-        break
-      case ('encrypt'):
-        encryptVal = 0
-        if (contents !== 'stop') {
-          for (let i = 0; i < contents.length; i++) {
-            encryptVal += contents.charCodeAt(i)
-          }
-        }
-        break
-      default:
-        if (command.charAt(0) === '@') {
-          newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (whisper): ${contents}`
-          newContents = encrypt(newContents)
-          server.write(new Message({ username, command, contents: newContents }).toJSON() + '\n')
-          lastCommand = command
-          break
-        }
-        // code to check if there was a previous command if no valid command was given
-        if (lastCommand) {
-          newContents = dateFormat(new Date(), 'ddd mmm d H:MM:ss Z yyyy') + ` <${username}> (whisper): ${command} ${contents}`
-          newContents = encrypt(newContents)
-          server.write(new Message({ username, command: lastCommand, contents: newContents }).toJSON() + '\n')
-        } else {
-          this.log(`Command <${command}> was not recognized`)
-        }
-        break
+    if (!processCommand(command, contents)) {
+      if (!lastCommand) {
+        this.log(`Command <${command}> was not recognized`)
+        this.log(fs.readFileSync('./src/instructions.txt').toString())
+      } else if (!processCommand(lastCommand, command + ' ' + contents)) {
+        this.log(`you broke something because last command should be false unless a valid command took place, so you should never be here`)
+      }
     }
     callback()
   })
