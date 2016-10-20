@@ -63,7 +63,6 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			log.error("Could not initialize PrintWriter to write to client", e);
 		}
-
 	}
 
 	/**
@@ -186,7 +185,7 @@ public class ClientHandler implements Runnable {
 					log.info("user <{}> sent message <{}> to all users", message.getUsername(), message.getContents());
 					broadcast(message);
 					} else {
-						log.info("user <{}> likes broadcasting to himself", message.getUsername());
+						log.info("user <{}> likes broadcasting to himself", username);
 						message.setContents("You do realize that you are the only one in here right?");
 						unsentMessagesCollection.addMessageToUserQueue(username, message);
 					}
@@ -203,9 +202,7 @@ public class ClientHandler implements Runnable {
 						} else {
 							if (username.equals(recipient)) {
 								// Because why are you talking to yourself?
-								// There is an echo function if you are just
-								// testing stuff.
-								log.info("user <{}> is an odd fellow");
+								log.info("user <{}> is an odd fellow", username);
 								message.setContents("Why are you whispering to yourself?");
 								unsentMessagesCollection.addMessageToUserQueue(username, message);
 							} else {
@@ -213,7 +210,6 @@ public class ClientHandler implements Runnable {
 										message.getContents(), recipient);
 								unsentMessagesCollection.addMessageToUserQueue(recipient, message);
 								unsentMessagesCollection.addMessageToUserQueue(username, new Message(username, message.getCommand(), "Message Sent to " + recipient));
-								
 							}
 						}
 					} else {
@@ -227,7 +223,6 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			log.error("error processing command", e);
 		}
-
 	}
 
 	/**
@@ -253,5 +248,4 @@ public class ClientHandler implements Runnable {
 			log.info(username + "'s client handler has come to an end");
 		}
 	}
-
 }

@@ -16,6 +16,13 @@ let lastCommand
 let replyCommand
 let encryptVal = 0
 
+/**
+  *My own super secret highly advanced encryption algorithms, haha nah pretty basic encryption
+  *note if encryption is not enabled the message is not actually encrypted but all messages are still
+  *at least passed through this function
+  *@param a string to be encrypted
+  *@return the encrypted sting if encryption is enabled or the original string if not
+  */
 function encrypt (someString) {
   if (encryptVal) {
     return someString.split('').map(char => char.charCodeAt(0) * encryptVal).join(' ')
@@ -71,10 +78,10 @@ cli
         }
       }
       if (encryptVal) {
-        // my own super secret highly advanced encryption algoriths, haha nah pretty basic encryption
-        let encryptedContentsArr = contents.split(' ')
-        let unencryptedContentsArr = encryptedContentsArr.map(encChar => String.fromCharCode(encChar/encryptVal))
         if (command === 'echo' || command === 'broadcast' || command.charAt(0) === '@') {
+          // my basic decription algorithm
+          let encryptedContentsArr = contents.split(' ')
+          let unencryptedContentsArr = encryptedContentsArr.map(encChar => String.fromCharCode(encChar / encryptVal))
           this.log(chalk.cyan(unencryptedContentsArr.join('')))
         }
       }
