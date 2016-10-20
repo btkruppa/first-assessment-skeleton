@@ -1,0 +1,12 @@
+To send a command to the server type the command followed by a message(if required)
+Commands(message not required):
+  'disconnect': this will disconnect you from the chat server
+  'users': this will get a list of users connected to the server
+Commands(message required):
+  'echo': sends the message to the server, and the server sends it back to you
+  'broadcast': broadcast a message to all users connected to the server
+  '@username': provide any username and a message will be sent to that user if he exists
+  '/r': will reply to the last user that sent you a message directly
+  'encrypt': message will be used as the encryption key, afterwards all messages will
+    be encrypted and you will receive all messages in both an encrypted and unencrypted form,
+    the unencrypted form will always be in the color cyan

@@ -20,10 +20,6 @@ public class Main {
 		Server server = new Server(8080, executor);
 		
 		Future<?> done = executor.submit(server);
-//		for(int i = 0; i < 100; i++) {
-//			System.out.println(Thread.activeCount());
-//			Thread.sleep(4000);
-//		}
 		
 		try {
 			done.get();
