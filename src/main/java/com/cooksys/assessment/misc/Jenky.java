@@ -1,4 +1,4 @@
-package misc;
+package com.cooksys.assessment.misc;
 
 /**
  * Something being just plain stupid, idiotic, or wrong.

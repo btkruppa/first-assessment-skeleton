@@ -5,12 +5,11 @@ import java.io.PrintWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cooksys.assessment.collection.UnsentMessagesCollection;
+import com.cooksys.assessment.misc.Jenky;
 import com.cooksys.assessment.model.Message;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import collection.UnsentMessagesCollection;
-import misc.Jenky;
 
 /**
  * Provides a method for servicing a given users queue by waiting while the

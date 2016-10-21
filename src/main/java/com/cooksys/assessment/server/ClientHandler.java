@@ -13,11 +13,10 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cooksys.assessment.collection.UnsentMessagesCollection;
+import com.cooksys.assessment.misc.Shenanigans;
 import com.cooksys.assessment.model.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import collection.UnsentMessagesCollection;
-import misc.Shenanigans;
 
 /**
  * Handles a client on a specific socket. Implements runnable so it can handle a

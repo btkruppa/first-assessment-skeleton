@@ -1,4 +1,4 @@
-package misc;
+package com.cooksys.assessment.misc;
 
 /**
  * A mischievous or deceitful trick, practice, etc.

@@ -1,4 +1,4 @@
-package collection;
+package com.cooksys.assessment.collection;
 
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
